@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Voice Search Router</string>
+    <string name="service_description">Routes a query recognized by the system Assistant into the selected TV app.</string>
+    <string name="app_intro">The system Assistant recognizes speech and Router sends the text to an app search.</string>
+    <string name="shield_service_path">On Shield, enable the service under: Device Preferences → Accessibility → Voice Search Router.</string>
+    <string name="open_settings">Open settings</string>
+    <string name="language_title">Interface language</string>
+    <string name="language_system">System default</string>
+    <string name="language_russian">Русский</string>
+    <string name="language_english">English</string>
+    <string name="routing_title">Search routing</string>
+    <string name="routing_hint">“Default” receives hardware-microphone searches from the launcher or an unchecked app. “When active” returns a hardware-microphone search to this app when it is open. On-screen microphone buttons remain under the app’s control.</string>
+    <string name="column_application">Application</string>
+    <string name="column_default">Default</string>
+    <string name="column_active">When active</string>
+    <string name="system_search">Android TV system search</string>
+    <string name="use_system_default">Use system search by default</string>
+    <string name="default_for">Default: %1$s</string>
+    <string name="active_for">Route when active: %1$s</string>
+    <string name="shield_path_toast">Shield: Device Preferences → Accessibility</string>
+    <string name="accessibility_unavailable">Accessibility settings are unavailable on this device</string>
+    <string name="service_enabled">Voice Search Router is enabled</string>
+    <string name="search_in">Search in %1$s: %2$s</string>
+    <string name="search_field_not_found">Could not find a search field</string>
+    <string name="support_title">Feedback and diagnostics</string>
+    <string name="support_description">If routing does not work in an app, send a diagnostic report and describe what you did immediately before the failure.</string>
+    <string name="send_diagnostics">Send diagnostics</string>
+    <string name="diagnostics_sending">Sending…</string>
+    <string name="diagnostics_sent">Diagnostics sent. Thank you!</string>
+    <string name="diagnostics_failed">Could not send diagnostics. Check the network and try again.</string>
+    <string name="diagnostics_not_configured">Diagnostic delivery has not been configured yet.</string>
+    <string name="diagnostics_privacy">The report contains device, Android and app versions, routing settings and recent Router events. Recognized phrases, passwords and microphone audio are not collected.</string>
+    <string name="diagnostics_subject">Voice Search Router diagnostics</string>
+    <string name="diagnostics_copied">No sharing app was found. The report was copied to the clipboard.</string>
+    <string name="author">made by KALINKIN</string>
+    <string name="open_telegram">Telegram: @KALINKIN</string>
+    <string name="telegram_copied">No browser or Telegram app was found. @KALINKIN was copied.</string>
+</resources>
