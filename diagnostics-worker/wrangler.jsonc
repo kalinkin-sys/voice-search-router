@@ -1,0 +1,38 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "voice-router-diagnostics",
+  "main": "src/index.js",
+  "compatibility_date": "2026-09-25",
+  "workers_dev": true,
+  "vars": {
+    "FROM_ADDRESS": "diagnostics@example.com",
+    "TO_ADDRESS": "owner@example.com"
+  },
+  "send_email": [
+    {
+      "name": "DIAGNOSTICS_EMAIL",
+      "destination_address": "owner@example.com"
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "PER_INSTALL_LIMITER",
+      "namespace_id": "17001",
+      "simple": {
+        "limit": 3,
+        "period": 60
+      }
+    },
+    {
+      "name": "GLOBAL_LIMITER",
+      "namespace_id": "17002",
+      "simple": {
+        "limit": 60,
+        "period": 60
+      }
+    }
+  ],
+  "observability": {
+    "enabled": true
+  }
+}
