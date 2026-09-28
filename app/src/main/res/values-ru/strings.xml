@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="service_description">Передаёт запрос, распознанный системным Assistant, в выбранное TV-приложение.</string>
+    <string name="app_intro">Системный Assistant распознаёт речь, а Router передаёт текст в поиск приложения.</string>
+    <string name="shield_service_path">На Shield служба включается по пути: Настройки устройства → Специальные возможности → Voice Search Router.</string>
+    <string name="open_settings">Открыть настройки</string>
+    <string name="language_title">Язык интерфейса</string>
+    <string name="language_system">Как в системе</string>
+    <string name="routing_title">Маршрутизация поиска</string>
+    <string name="routing_hint">«По умолчанию» — куда отправлять запрос аппаратной кнопки микрофона из лаунчера или неотмеченного приложения. «В активном» — возвращать такой запрос в открытое приложение. Экранные кнопки микрофона остаются под управлением самого приложения.</string>
+    <string name="column_application">Приложение</string>
+    <string name="column_default">По умолчанию</string>
+    <string name="column_active">В активном</string>
+    <string name="system_search">Системный поиск Android TV</string>
+    <string name="use_system_default">Использовать системный поиск по умолчанию</string>
+    <string name="default_for">По умолчанию: %1$s</string>
+    <string name="active_for">Перехватывать в активном: %1$s</string>
+    <string name="shield_path_toast">Shield: Настройки устройства → Специальные возможности</string>
+    <string name="accessibility_unavailable">Экран специальных возможностей на этом устройстве недоступен</string>
+    <string name="service_enabled">Voice Search Router включён</string>
+    <string name="search_in">Поиск в %1$s: %2$s</string>
+    <string name="search_field_not_found">Не удалось найти поле поиска</string>
+    <string name="support_title">Обратная связь и диагностика</string>
+    <string name="support_description">Если маршрутизация не работает в каком-либо приложении, отправьте диагностический отчёт и опишите, что вы делали непосредственно перед сбоем.</string>
+    <string name="send_diagnostics">Отправить диагностику</string>
+    <string name="diagnostics_sending">Отправка…</string>
+    <string name="diagnostics_sent">Диагностика отправлена. Спасибо!</string>
+    <string name="diagnostics_failed">Не удалось отправить диагностику. Проверьте сеть и попробуйте снова.</string>
+    <string name="diagnostics_not_configured">Отправка диагностики пока не настроена.</string>
+    <string name="diagnostics_privacy">В отчёт входят модель устройства, версии Android и приложений, настройки маршрутизации и последние события Router. Распознанные фразы, пароли и звук с микрофона не собираются.</string>
+    <string name="diagnostics_subject">Диагностика Voice Search Router</string>
+    <string name="diagnostics_copied">Приложение для отправки не найдено. Отчёт скопирован в буфер обмена.</string>
+    <string name="author">made by KALINKIN</string>
+    <string name="open_telegram">Telegram: @KALINKIN</string>
+    <string name="telegram_copied">Telegram или браузер не найден. @KALINKIN скопирован.</string>
+</resources>
