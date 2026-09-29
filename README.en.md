@@ -40,18 +40,27 @@ such as SmartTube and KinoPub does not receive the recognized text.
 
 ## Installation
 
-1. Download the APK from [Releases](../../releases/latest).
-2. Open the APK on your Android TV device and confirm installation. With ADB:
+### With Downloader
+
+1. Open the Downloader app on Android TV.
+2. Enter code **9421249**, or open [aftv.news/9421249](http://aftv.news/9421249).
+3. Download the APK and confirm installation.
+
+You can also download the APK directly from [Releases](../../releases/latest).
+
+### With ADB
 
 ```bash
 adb install VoiceSearchRouter.apk
 ```
 
-3. Launch Voice Search Router.
-4. Select **Open settings**.
-5. Enable `Voice Search Router` under Accessibility.
-6. Choose a default app.
-7. Enable routing for the apps that should receive a query while active.
+After installation:
+
+1. Launch Voice Search Router.
+2. Select **Open settings**.
+3. Enable `Voice Search Router` under Accessibility.
+4. Choose a default app.
+5. Enable routing for the apps that should receive a query while active.
 
 On Nvidia Shield, the setting is usually located at:
 
