@@ -5,6 +5,8 @@
     <string name="app_intro">The system Assistant recognizes speech and Router sends the text to an app search.</string>
     <string name="shield_service_path">On Shield, enable the service under: Device Preferences → Accessibility → Voice Search Router.</string>
     <string name="open_settings">Open settings</string>
+    <string name="service_status_enabled">Accessibility service: enabled</string>
+    <string name="service_status_disabled">Accessibility service: disabled — open settings to enable</string>
     <string name="language_title">Interface language</string>
     <string name="language_system">System default</string>
     <string name="language_russian">Русский</string>
