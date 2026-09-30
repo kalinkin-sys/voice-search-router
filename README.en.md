@@ -26,6 +26,7 @@ such as SmartTube and KinoPub does not receive the recognized text.
 - Dedicated routing for SmartTube and KinoPub.
 - Best-effort generic routing for other Android TV apps.
 - Russian and English UI with automatic system-language detection.
+- A prominent accessibility-service status indicator with quick access to settings.
 - One-click diagnostic reports for troubleshooting.
 - No root access required.
 
