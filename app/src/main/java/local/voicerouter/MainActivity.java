@@ -1,5 +1,6 @@
 package local.voicerouter;
 
+import android.Manifest;
 import android.app.Activity;
 import android.content.ClipData;
 import android.content.ClipboardManager;
@@ -10,9 +11,11 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.graphics.Color;
+import android.graphics.Typeface;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.text.SpannableString;
@@ -31,7 +34,10 @@ import android.widget.ScrollView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.File;
 import java.util.LinkedHashMap;
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -41,6 +47,12 @@ public final class MainActivity extends Activity {
     private final Map<String, RadioButton> defaultRadios = new LinkedHashMap<>();
     private final Map<String, CheckBox> enabledChecks = new LinkedHashMap<>();
     private RadioButton systemDefault;
+    private TextView serviceStatus;
+    private TextView updateStatus;
+    private Button checkUpdatesButton;
+    private Button installUpdateButton;
+    private UpdateChecker.UpdateInfo availableUpdate;
+    private boolean updateDownloadReady;
 
     @Override
     protected void attachBaseContext(Context base) {
@@ -61,6 +73,20 @@ public final class MainActivity extends Activity {
         TextView title = text(getString(R.string.app_name), 32, Color.WHITE);
         title.setGravity(Gravity.CENTER);
         root.addView(title, new LinearLayout.LayoutParams(-1, -2));
+
+        serviceStatus = text("", 19, Color.WHITE);
+        serviceStatus.setGravity(Gravity.CENTER);
+        serviceStatus.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
+        serviceStatus.setPadding(24, 16, 24, 16);
+        serviceStatus.setFocusable(true);
+        serviceStatus.setClickable(true);
+        serviceStatus.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) { openAccessibilitySettings(); }
+        });
+        LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
+        statusParams.setMargins(0, 22, 0, 4);
+        root.addView(serviceStatus, statusParams);
+        updateServiceStatus();
 
         TextView body = text(getString(R.string.app_intro) + "\n\n"
                 + getString(R.string.shield_service_path), 19, Color.LTGRAY);
@@ -88,6 +114,7 @@ public final class MainActivity extends Activity {
         root.addView(open, new LinearLayout.LayoutParams(-1, -2));
 
         addLanguageSelector(root);
+        addUpdateSection(root);
 
         TextView section = text(getString(R.string.routing_title), 24, Color.WHITE);
         LinearLayout.LayoutParams sectionParams = new LinearLayout.LayoutParams(-1, -2);
@@ -115,7 +142,52 @@ public final class MainActivity extends Activity {
         addAuthorLine(root);
 
         setContentView(scroll);
+        UpdateScheduler.sync(this);
+        showSavedUpdate();
+        maybeCheckForUpdates();
+        maybeRequestNotificationPermission();
         open.requestFocus();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
+        updateServiceStatus();
+        if (availableUpdate != null && UpdateInstaller.isDownloaded(this)) {
+            updateDownloadReady = true;
+            updateStatus.setText(getString(R.string.update_ready_to_install,
+                    availableUpdate.version));
+            installUpdateButton.setText(getString(R.string.install_update));
+            installUpdateButton.setVisibility(View.VISIBLE);
+        }
+    }
+
+    private void updateServiceStatus() {
+        if (serviceStatus == null) return;
+        boolean enabled = isRouterServiceEnabled();
+        serviceStatus.setText(enabled
+                ? getString(R.string.service_status_enabled)
+                : getString(R.string.service_status_disabled));
+        serviceStatus.setContentDescription(getString(enabled
+                ? R.string.service_status_enabled
+                : R.string.service_status_disabled));
+        serviceStatus.setBackground(statusBackground(enabled));
+    }
+
+    private boolean isRouterServiceEnabled() {
+        String enabled = Settings.Secure.getString(getContentResolver(),
+                Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES);
+        if (enabled == null) return false;
+        ComponentName component = new ComponentName(this, VoiceRouterService.class);
+        return enabled.contains(component.flattenToString())
+                || enabled.contains(component.flattenToShortString());
+    }
+
+    private GradientDrawable statusBackground(boolean enabled) {
+        return roundedButton(
+                enabled ? Color.rgb(28, 92, 52) : Color.rgb(132, 45, 45),
+                enabled ? Color.rgb(86, 210, 125) : Color.rgb(255, 130, 130),
+                3);
     }
 
     private void addLanguageSelector(LinearLayout root) {
@@ -158,6 +230,177 @@ public final class MainActivity extends Activity {
         radio.setChecked(mode.equals(current));
         modes.put(radio.getId(), mode);
         group.addView(radio, new RadioGroup.LayoutParams(0, -2, 1f));
+    }
+
+    private void addUpdateSection(LinearLayout root) {
+        TextView title = text(getString(R.string.updates_title), 24, Color.WHITE);
+        LinearLayout.LayoutParams titleParams = new LinearLayout.LayoutParams(-1, -2);
+        titleParams.setMargins(0, 34, 0, 8);
+        root.addView(title, titleParams);
+
+        TextView current = text(getString(R.string.current_version,
+                UpdateChecker.currentVersion(this)), 17, Color.LTGRAY);
+        root.addView(current, new LinearLayout.LayoutParams(-1, -2));
+
+        final CheckBox automatic = new CheckBox(this);
+        automatic.setText(getString(R.string.automatic_updates));
+        automatic.setTextColor(Color.WHITE);
+        automatic.setTextSize(18);
+        automatic.setFocusable(true);
+        automatic.setChecked(UpdateChecker.automatic(this));
+        automatic.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
+            @Override public void onCheckedChanged(CompoundButton button, boolean checked) {
+                UpdateChecker.setAutomatic(MainActivity.this, checked);
+                UpdateScheduler.sync(MainActivity.this);
+                if (checked) {
+                    maybeRequestNotificationPermission();
+                    checkForUpdates(false);
+                }
+            }
+        });
+        root.addView(automatic, new LinearLayout.LayoutParams(-1, -2));
+
+        checkUpdatesButton = actionButton(getString(R.string.check_for_updates));
+        checkUpdatesButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) { checkForUpdates(true); }
+        });
+        root.addView(checkUpdatesButton, new LinearLayout.LayoutParams(-1, -2));
+
+        updateStatus = text(getString(R.string.update_never_checked), 16, Color.LTGRAY);
+        LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
+        statusParams.setMargins(0, 8, 0, 8);
+        root.addView(updateStatus, statusParams);
+
+        installUpdateButton = actionButton(getString(R.string.download_and_install));
+        installUpdateButton.setVisibility(View.GONE);
+        installUpdateButton.setOnClickListener(new View.OnClickListener() {
+            @Override public void onClick(View view) {
+                if (updateDownloadReady && UpdateInstaller.isDownloaded(MainActivity.this)) {
+                    if (!UpdateInstaller.install(MainActivity.this)) {
+                        updateStatus.setText(getString(R.string.update_installer_unavailable));
+                    }
+                } else {
+                    downloadUpdate();
+                }
+            }
+        });
+        root.addView(installUpdateButton, new LinearLayout.LayoutParams(-1, -2));
+    }
+
+    private void maybeCheckForUpdates() {
+        if (!UpdateChecker.automatic(this)) return;
+        long age = System.currentTimeMillis() - UpdateChecker.lastCheck(this);
+        if (age >= UpdateChecker.CHECK_INTERVAL_MS) checkForUpdates(false);
+    }
+
+    private void checkForUpdates(final boolean manual) {
+        if (checkUpdatesButton == null || !checkUpdatesButton.isEnabled()) return;
+        checkUpdatesButton.setEnabled(false);
+        updateStatus.setText(getString(R.string.checking_for_updates));
+        new Thread(new Runnable() {
+            @Override public void run() {
+                final UpdateChecker.Result result = UpdateChecker.check(
+                        getApplicationContext());
+                runOnUiThread(new Runnable() {
+                    @Override public void run() {
+                        checkUpdatesButton.setEnabled(true);
+                        if (result.update != null) {
+                            showAvailableUpdate(result.update);
+                        } else if (result.upToDate) {
+                            availableUpdate = null;
+                            updateDownloadReady = false;
+                            installUpdateButton.setVisibility(View.GONE);
+                            updateStatus.setText(getString(R.string.update_up_to_date,
+                                    UpdateChecker.currentVersion(MainActivity.this)));
+                        } else if (manual) {
+                            updateStatus.setText(getString(R.string.update_check_failed));
+                            DiagnosticLog.add(MainActivity.this,
+                                    "Update check failed: " + result.error);
+                        } else {
+                            showLastChecked();
+                        }
+                    }
+                });
+            }
+        }, "manual-update-check").start();
+    }
+
+    private void showSavedUpdate() {
+        UpdateChecker.UpdateInfo saved = UpdateChecker.savedUpdate(this);
+        if (saved != null) showAvailableUpdate(saved);
+        else showLastChecked();
+    }
+
+    private void showAvailableUpdate(UpdateChecker.UpdateInfo update) {
+        availableUpdate = update;
+        updateDownloadReady = UpdateInstaller.isDownloaded(this);
+        updateStatus.setText(updateDownloadReady
+                ? getString(R.string.update_ready_to_install, update.version)
+                : getString(R.string.update_available, update.version));
+        installUpdateButton.setText(getString(updateDownloadReady
+                ? R.string.install_update : R.string.download_and_install));
+        installUpdateButton.setVisibility(View.VISIBLE);
+    }
+
+    private void showLastChecked() {
+        long checked = UpdateChecker.lastCheck(this);
+        if (checked == 0L) {
+            updateStatus.setText(getString(R.string.update_never_checked));
+            return;
+        }
+        String date = DateFormat.getDateTimeInstance(DateFormat.SHORT, DateFormat.SHORT)
+                .format(new Date(checked));
+        updateStatus.setText(getString(R.string.update_last_checked, date));
+    }
+
+    private void downloadUpdate() {
+        if (availableUpdate == null) return;
+        checkUpdatesButton.setEnabled(false);
+        installUpdateButton.setEnabled(false);
+        updateStatus.setText(getString(R.string.update_downloading,
+                availableUpdate.version));
+        UpdateInstaller.download(getApplicationContext(), availableUpdate,
+                new UpdateInstaller.Callback() {
+                    @Override public void onReady(File file) {
+                        runOnUiThread(new Runnable() {
+                            @Override public void run() {
+                                checkUpdatesButton.setEnabled(true);
+                                installUpdateButton.setEnabled(true);
+                                updateDownloadReady = true;
+                                installUpdateButton.setText(getString(R.string.install_update));
+                                updateStatus.setText(getString(R.string.update_ready_to_install,
+                                        availableUpdate.version));
+                                if (!UpdateInstaller.install(MainActivity.this)) {
+                                    updateStatus.setText(getString(
+                                            R.string.update_installer_unavailable));
+                                }
+                            }
+                        });
+                    }
+
+                    @Override public void onFailure(final String reason) {
+                        runOnUiThread(new Runnable() {
+                            @Override public void run() {
+                                checkUpdatesButton.setEnabled(true);
+                                installUpdateButton.setEnabled(true);
+                                updateStatus.setText(getString(R.string.update_download_failed));
+                                DiagnosticLog.add(MainActivity.this,
+                                        "Update download failed: " + reason);
+                            }
+                        });
+                    }
+                });
+    }
+
+    private void maybeRequestNotificationPermission() {
+        if (Build.VERSION.SDK_INT < 33 || !UpdateChecker.automatic(this)
+                || UpdateChecker.notificationPrompted(this)
+                || checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS)
+                == PackageManager.PERMISSION_GRANTED) {
+            return;
+        }
+        UpdateChecker.setNotificationPrompted(this);
+        requestPermissions(new String[] {Manifest.permission.POST_NOTIFICATIONS}, 1001);
     }
 
     private LinearLayout makeHeaderRow() {
