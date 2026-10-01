@@ -27,6 +27,8 @@ such as SmartTube and KinoPub does not receive the recognized text.
 - Best-effort generic routing for other Android TV apps.
 - Russian and English UI with automatic system-language detection.
 - A prominent accessibility-service status indicator with quick access to settings.
+- Automatic and manual update checks through GitHub Releases.
+- Secure update downloads with APK checksum and signing-certificate verification.
 - One-click diagnostic reports for troubleshooting.
 - No root access required.
 
@@ -62,6 +64,10 @@ After installation:
 3. Enable `Voice Search Router` under Accessibility.
 4. Choose a default app.
 5. Enable routing for the apps that should receive a query while active.
+
+Starting with version 1.8, the app checks GitHub Releases once per day. Automatic
+checks can be disabled, and **Check now** remains available on the main screen.
+Android still asks the user to confirm installation; silent installation is not used.
 
 On Nvidia Shield, the setting is usually located at:
 
@@ -118,6 +124,10 @@ gradle :app:assembleDebug
 ```
 
 The APK will be written to `app/build/outputs/apk/debug/`.
+
+The `Publish Android release` workflow builds a signed release APK and publishes
+it to GitHub Releases. It requires repository secrets containing a stable signing
+key; every update must use the same key.
 
 ## Author
 
