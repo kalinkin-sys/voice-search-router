@@ -38,4 +38,22 @@
     <string name="author">made by KALINKIN</string>
     <string name="open_telegram">Telegram: @KALINKIN</string>
     <string name="telegram_copied">No browser or Telegram app was found. @KALINKIN was copied.</string>
+    <string name="updates_title">Updates</string>
+    <string name="current_version">Current version: %1$s</string>
+    <string name="automatic_updates">Check for updates automatically</string>
+    <string name="check_for_updates">Check now</string>
+    <string name="checking_for_updates">Checking for updates…</string>
+    <string name="update_never_checked">Updates have not been checked yet.</string>
+    <string name="update_last_checked">Last checked: %1$s</string>
+    <string name="update_up_to_date">Version %1$s is up to date.</string>
+    <string name="update_available_title">Voice Search Router update</string>
+    <string name="update_available">Version %1$s is available.</string>
+    <string name="download_and_install">Download and install</string>
+    <string name="install_update">Install update</string>
+    <string name="update_downloading">Downloading version %1$s…</string>
+    <string name="update_ready_to_install">Version %1$s is ready to install.</string>
+    <string name="update_check_failed">Could not check for updates. Check the network and try again.</string>
+    <string name="update_download_failed">The update could not be verified or downloaded.</string>
+    <string name="update_installer_unavailable">The Android package installer is unavailable on this device.</string>
+    <string name="update_channel_name">Application updates</string>
 </resources>
