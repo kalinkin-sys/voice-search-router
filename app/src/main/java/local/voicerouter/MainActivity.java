@@ -48,6 +48,7 @@ public final class MainActivity extends Activity {
     private final Map<String, CheckBox> enabledChecks = new LinkedHashMap<>();
     private RadioButton systemDefault;
     private TextView serviceStatus;
+    private Button openSettingsButton;
     private TextView updateStatus;
     private Button checkUpdatesButton;
     private Button installUpdateButton;
@@ -78,43 +79,36 @@ public final class MainActivity extends Activity {
         serviceStatus.setGravity(Gravity.CENTER);
         serviceStatus.setTypeface(Typeface.DEFAULT, Typeface.BOLD);
         serviceStatus.setPadding(24, 16, 24, 16);
-        serviceStatus.setFocusable(true);
-        serviceStatus.setClickable(true);
-        serviceStatus.setOnClickListener(new View.OnClickListener() {
-            @Override public void onClick(View view) { openAccessibilitySettings(); }
-        });
         LinearLayout.LayoutParams statusParams = new LinearLayout.LayoutParams(-1, -2);
         statusParams.setMargins(0, 22, 0, 4);
         root.addView(serviceStatus, statusParams);
-        updateServiceStatus();
 
-        TextView body = text(getString(R.string.app_intro) + "\n\n"
-                + getString(R.string.shield_service_path), 19, Color.LTGRAY);
+        TextView body = text(getString(R.string.app_intro), 19, Color.LTGRAY);
         body.setGravity(Gravity.CENTER);
         LinearLayout.LayoutParams bodyParams = new LinearLayout.LayoutParams(-1, -2);
         bodyParams.setMargins(0, 26, 0, 28);
         root.addView(body, bodyParams);
 
-        Button open = new Button(this);
-        open.setText(getString(R.string.open_settings));
-        open.setTextSize(18);
-        open.setTextColor(Color.WHITE);
-        open.setBackground(makeSettingsButtonBackground());
-        open.setPadding(24, 18, 24, 18);
-        open.setFocusable(true);
-        open.setOnFocusChangeListener(new View.OnFocusChangeListener() {
+        openSettingsButton = new Button(this);
+        openSettingsButton.setText(getString(R.string.open_settings));
+        openSettingsButton.setTextSize(18);
+        openSettingsButton.setTextColor(Color.WHITE);
+        openSettingsButton.setBackground(makeSettingsButtonBackground());
+        openSettingsButton.setPadding(24, 18, 24, 18);
+        openSettingsButton.setFocusable(true);
+        openSettingsButton.setOnFocusChangeListener(new View.OnFocusChangeListener() {
             @Override public void onFocusChange(View view, boolean focused) {
                 view.animate().scaleX(focused ? 1.025f : 1f)
                         .scaleY(focused ? 1.025f : 1f).setDuration(120L).start();
             }
         });
-        open.setOnClickListener(new View.OnClickListener() {
+        openSettingsButton.setOnClickListener(new View.OnClickListener() {
             @Override public void onClick(View view) { openAccessibilitySettings(); }
         });
-        root.addView(open, new LinearLayout.LayoutParams(-1, -2));
+        root.addView(openSettingsButton, new LinearLayout.LayoutParams(-1, -2));
+        updateServiceStatus();
 
         addLanguageSelector(root);
-        addUpdateSection(root);
 
         TextView section = text(getString(R.string.routing_title), 24, Color.WHITE);
         LinearLayout.LayoutParams sectionParams = new LinearLayout.LayoutParams(-1, -2);
@@ -139,6 +133,7 @@ public final class MainActivity extends Activity {
                     new LinearLayout.LayoutParams(-1, -2));
         }
 
+        addUpdateSection(root);
         addAuthorLine(root);
 
         setContentView(scroll);
@@ -146,7 +141,11 @@ public final class MainActivity extends Activity {
         showSavedUpdate();
         maybeCheckForUpdates();
         maybeRequestNotificationPermission();
-        open.requestFocus();
+        if (openSettingsButton.getVisibility() == View.VISIBLE) {
+            openSettingsButton.requestFocus();
+        } else {
+            systemDefault.requestFocus();
+        }
     }
 
     @Override
@@ -172,6 +171,9 @@ public final class MainActivity extends Activity {
                 ? R.string.service_status_enabled
                 : R.string.service_status_disabled));
         serviceStatus.setBackground(statusBackground(enabled));
+        if (openSettingsButton != null) {
+            openSettingsButton.setVisibility(enabled ? View.GONE : View.VISIBLE);
+        }
     }
 
     private boolean isRouterServiceEnabled() {
