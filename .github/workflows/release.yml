@@ -1,0 +1,83 @@
+name: Publish Android release
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
+      - name: Install Android SDK packages
+        run: |
+          "${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin/sdkmanager" \
+            "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Restore release signing key
+        env:
+          KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          test -n "$KEYSTORE_BASE64"
+          printf '%s' "$KEYSTORE_BASE64" | base64 --decode \
+            > "$RUNNER_TEMP/voice-router-release.keystore"
+
+      - name: Build signed release APK
+        env:
+          ANDROID_KEYSTORE_FILE: ${{ runner.temp }}/voice-router-release.keystore
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: gradle :app:assembleRelease --stacktrace
+
+      - name: Verify and name APK
+        run: |
+          APK=app/build/outputs/apk/release/app-release.apk
+          test -f "$APK"
+          "${ANDROID_SDK_ROOT}/build-tools/35.0.0/apksigner" verify \
+            --verbose --print-certs "$APK"
+          cp "$APK" VoiceSearchRouter.apk
+          shasum -a 256 VoiceSearchRouter.apk | tee VoiceSearchRouter.apk.sha256
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: VoiceSearchRouter-release
+          path: |
+            VoiceSearchRouter.apk
+            VoiceSearchRouter.apk.sha256
+
+      - name: Publish GitHub Release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          VERSION=$(sed -n 's/.*versionName "\([^"]*\)".*/\1/p' app/build.gradle)
+          test -n "$VERSION"
+          TAG="v$VERSION"
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release $TAG already exists" >&2
+            exit 1
+          fi
+          cp "release-notes/$VERSION.md" "$RUNNER_TEMP/release-notes.md"
+          {
+            printf '\n## Verification\n\n`'
+            cat VoiceSearchRouter.apk.sha256
+            printf '`\n'
+          } >> "$RUNNER_TEMP/release-notes.md"
+          gh release create "$TAG" VoiceSearchRouter.apk \
+            --target "$GITHUB_SHA" \
+            --title "Voice Search Router $VERSION" \
+            --notes-file "$RUNNER_TEMP/release-notes.md" \
+            --latest
