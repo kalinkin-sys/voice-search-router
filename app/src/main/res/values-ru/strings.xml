@@ -5,7 +5,7 @@
     <string name="shield_service_path">На Shield служба включается по пути: Настройки устройства → Специальные возможности → Voice Search Router.</string>
     <string name="open_settings">Открыть настройки</string>
     <string name="service_status_enabled">Служба специальных возможностей: включена</string>
-    <string name="service_status_disabled">Служба специальных возможностей: выключена — откройте настройки</string>
+    <string name="service_status_disabled">Служба специальных возможностей: выключена</string>
     <string name="language_title">Язык интерфейса</string>
     <string name="language_system">Как в системе</string>
     <string name="routing_title">Маршрутизация поиска</string>
