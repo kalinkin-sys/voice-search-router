@@ -2,6 +2,8 @@ plugins {
     id "com.android.application"
 }
 
+def releaseKeystore = System.getenv("ANDROID_KEYSTORE_FILE")
+
 android {
     namespace "local.voicerouter"
     compileSdk 35
@@ -10,8 +12,26 @@ android {
         applicationId "local.voicerouter"
         minSdk 28
         targetSdk 35
-        versionCode 8
-        versionName "1.7"
+        versionCode 9
+        versionName "1.8"
+    }
+
+    signingConfigs {
+        release {
+            if (releaseKeystore) {
+                storeFile file(releaseKeystore)
+                storePassword System.getenv("ANDROID_KEYSTORE_PASSWORD")
+                keyAlias System.getenv("ANDROID_KEY_ALIAS")
+                keyPassword System.getenv("ANDROID_KEY_PASSWORD")
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            if (releaseKeystore) signingConfig signingConfigs.release
+            minifyEnabled false
+        }
     }
 
     compileOptions {
