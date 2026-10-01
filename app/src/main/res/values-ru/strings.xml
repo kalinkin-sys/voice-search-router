@@ -35,4 +35,22 @@
     <string name="author">made by KALINKIN</string>
     <string name="open_telegram">Telegram: @KALINKIN</string>
     <string name="telegram_copied">Telegram или браузер не найден. @KALINKIN скопирован.</string>
+    <string name="updates_title">Обновления</string>
+    <string name="current_version">Текущая версия: %1$s</string>
+    <string name="automatic_updates">Проверять обновления автоматически</string>
+    <string name="check_for_updates">Проверить сейчас</string>
+    <string name="checking_for_updates">Проверяю обновления…</string>
+    <string name="update_never_checked">Обновления ещё не проверялись.</string>
+    <string name="update_last_checked">Последняя проверка: %1$s</string>
+    <string name="update_up_to_date">Установлена актуальная версия %1$s.</string>
+    <string name="update_available_title">Обновление Voice Search Router</string>
+    <string name="update_available">Доступна версия %1$s.</string>
+    <string name="download_and_install">Скачать и установить</string>
+    <string name="install_update">Установить обновление</string>
+    <string name="update_downloading">Скачиваю версию %1$s…</string>
+    <string name="update_ready_to_install">Версия %1$s готова к установке.</string>
+    <string name="update_check_failed">Не удалось проверить обновления. Проверьте сеть и повторите.</string>
+    <string name="update_download_failed">Не удалось скачать или проверить обновление.</string>
+    <string name="update_installer_unavailable">Системный установщик Android недоступен на этом устройстве.</string>
+    <string name="update_channel_name">Обновления приложения</string>
 </resources>
